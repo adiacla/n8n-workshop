@@ -116,9 +116,9 @@ ssh -i tu-key.pem ubuntu@TU_ELASTIC_IP
 ## 4. Preparar el servidor
 
 Ejecutar en ambas instancias:
-
+```bash
 sudo apt update && sudo apt upgrade -y
-
+```
 ## 5. Configurar SWAP
 ```bash
 sudo fallocate -l 2G /swapfile
@@ -132,18 +132,24 @@ Verificar:
 free -h
 ```
 ## 6. Instalar Docker
-
+```bash
 sudo apt install -y ca-certificates curl gnupg
 sudo install -m 0755 -d /etc/apt/keyrings
+```
+```bash
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo tee /etc/apt/keyrings/docker.gpg > /dev/null
 sudo chmod a+r /etc/apt/keyrings/docker.gpg
 echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu noble stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+```
+```bash
 sudo apt update
 sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
 
 Activar Docker:
-
+```bash
 sudo systemctl enable docker
 sudo systemctl start docker
 sudo usermod -aG docker ubuntu
