@@ -110,9 +110,9 @@ Verificar:
 curl ifconfig.me
 
 # 3. Conectarse por SSH
-´´´bash
+```bash
 ssh -i tu-key.pem ubuntu@TU_ELASTIC_IP
-´´´
+```
 ## 4. Preparar el servidor
 
 Ejecutar en ambas instancias:
@@ -120,17 +120,17 @@ Ejecutar en ambas instancias:
 sudo apt update && sudo apt upgrade -y
 
 ## 5. Configurar SWAP
-´´´bash
+```bash
 sudo fallocate -l 2G /swapfile
 sudo chmod 600 /swapfile
 sudo mkswap /swapfile
 sudo swapon /swapfile
 echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
-´´´
+```
 Verificar:
-
+```bash
 free -h
-
+```
 ## 6. Instalar Docker
 
 sudo apt install -y ca-certificates curl gnupg
