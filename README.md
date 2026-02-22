@@ -110,8 +110,9 @@ Verificar:
 curl ifconfig.me
 
 # 3. Conectarse por SSH
+´´´bash
 ssh -i tu-key.pem ubuntu@TU_ELASTIC_IP
-
+´´´
 ## 4. Preparar el servidor
 
 Ejecutar en ambas instancias:
