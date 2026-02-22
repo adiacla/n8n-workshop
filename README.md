@@ -109,7 +109,7 @@ Verificar:
 
 curl ifconfig.me
 
-# 3. Conectarse por SSH
+# 3. Conectarse por SSH o por conexión desde la consola de AWS
 ```bash
 ssh -i tu-key.pem ubuntu@TU_ELASTIC_IP
 ```
@@ -131,36 +131,64 @@ Verificar:
 ```bash
 free -h
 ```
-## 6. Instalar Docker
+6. Crear carpeta de keyrings
 ```bash
-sudo apt install -y ca-certificates curl gnupg
-sudo install -m 0755 -d /etc/apt/keyrings
+sudo mkdir -p /etc/apt/keyrings
 ```
+ Descargar la clave correctamente
 ```bash
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo tee /etc/apt/keyrings/docker.gpg > /dev/null
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu noble stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+```
 
+Dar permisos
+```bash
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
 ```
+Agregar repositorio correctamente
+```bash
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/ubuntu \
+  noble stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+```
+
+Actualizar repositorios
 ```bash
 sudo apt update
+```
+Aquí ya NO debe salir el error de GPG
+
+Instalar Docker
+```bash
 sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
-
-Activar Docker:
+8. Activar Docker
 ```bash
 sudo systemctl enable docker
 sudo systemctl start docker
+```
+9. Permisos
+```bash
 sudo usermod -aG docker ubuntu
+```
+Cierra sesión SSH y vuelve a entrar
 
+
+10. Verificar
+```bash
+docker --version
+docker compose version
+docker run hello-world
+```
 Reiniciar sesión SSH.
 
 
 ## 7. Configurar PostgreSQL y Redis (EC2 #2)
-
+```bash
 mkdir ~/data && cd ~/data
 nano docker-compose.yml
+```
+```yml
 version: "3.8"
 
 services:
@@ -188,18 +216,29 @@ services:
 volumes:
   postgres_data:
   redis_data:
+```
 
 Levantar servicios:
-
+```bash
 docker compose up -d
-🔍 Obtener IP privada
+```
+
+Obtener IP privada
+```bash
 hostname -I
+```
 
 Ejemplo: 172.31.x.x
 
-⚙️ 8. Configurar n8n (EC2 #1)
+
+## 8. Configurar n8n (EC2 #1)
+```bash
 mkdir ~/n8n && cd ~/n8n
+```
+```bash
 nano docker-compose.yml
+```
+```yml
 version: "3.8"
 
 services:
@@ -240,36 +279,37 @@ services:
 
     volumes:
       - ~/.n8n:/home/node/.n8n
+
+```
+
 ## 9. Levantar n8n
+```bash
 docker compose up -d
-
+```
 Verificar:
-
+```bash
 docker ps
-
+```
 Logs:
 
+```bash
 docker logs -f n8n
+```
 
 ## 10. Acceso
+
 http://TU_ELASTIC_IP:5678
 
 
 ## 11. Seguridad
 EC2 n8n
-
 22 → tu IP
-
 80 → público
-
 443 → público
-
 5678 → solo tu IP
 
 EC2 DB
-
 5432 → solo IP privada n8n
-
 6379 → solo IP privada n8n
 
 ## 12. Validación
@@ -280,12 +320,15 @@ telnet IP_PRIVADA_DB 6379
 
 ** Problemas comunes **
 
-Problema	Causa
-Webhooks no funcionan	IP dinámica
-n8n pierde datos	SQLite en uso
-Errores en ejecución	Redis no configurado
-Timeout	puertos bloqueados
-🚀 Mejoras futuras
+|Problema	|Causa
+|---|---
+|Webhooks no funcionan	|IP dinámica
+|n8n pierde datos	|SQLite en uso
+|Errores en ejecución	|Redis no configurado
+|Timeout	puertos |bloqueados
+
+
+## Mejoras futuras que veremos en otro workshop
 
 Nginx + HTTPS (Let's Encrypt)
 
@@ -297,7 +340,8 @@ Backups automáticos
 
 Monitoreo (Prometheus/Grafana)
 
-📌 Conclusión
+
+## Conclusión
 
 Con esta arquitectura:
 
@@ -309,6 +353,6 @@ Se habilita uso de colas y agentes
 
 Se reduce riesgo de pérdida de datos
 
-🧠 Autor
+#Autor
 
-Guía técnica para despliegue de n8n en AWS con enfoque en producción y escalabilidad.
+Guía técnica para despliegue de n8n en AWS con enfoque en producción y escalabilidad fué realizado por Alfredo Díaz UNAB2026
