@@ -163,7 +163,7 @@ mkdir ~/data && cd ~/data
 nano docker-compose.yml
 ```
 ```bash
-docker-compose.yml
+docker-compose.yml  (CAMBIAR PASWORD)
 ```
 ```yaml
 
@@ -221,7 +221,7 @@ nano docker-compose.yml
 ```
 
 
-docker-compose.yml
+docker-compose.yml  (Cambie las IP y los PASWWORD)
 
 ```yaml
 
