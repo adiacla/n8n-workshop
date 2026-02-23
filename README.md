@@ -220,9 +220,8 @@ sudo chmod -R 755 n8n_data
 nano docker-compose.yml
 ```
 
-```bash
+
 docker-compose.yml
-```
 
 ```yaml
 
@@ -269,6 +268,7 @@ services:
 
     volumes:
       - ./n8n_data:/home/node/.n8n
+```
 
 ## Levantar n8n
 ```bash
