@@ -211,16 +211,18 @@ mkdir ~/n8n && cd ~/n8n
 mkdir n8n_data
 ```
 
-## CORRECCIÓN DE PERMISOS (OBLIGATORIO)
 ```bash
 sudo chown -R 1000:1000 n8n_data
 sudo chmod -R 755 n8n_data
-```bash
+```
 
+```bash
 nano docker-compose.yml
-```bash
+```
 
+```bash
 docker-compose.yml
+```
 
 ```yaml
 
