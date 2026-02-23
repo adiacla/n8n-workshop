@@ -1,34 +1,29 @@
 # n8n-workshop
-Ejemplo N8n en EC2 de  AWS, instalación, configuracion y ejemplo.
 
-# Deploy de n8n en AWS (EC2 + PostgreSQL + Redis)
-## Introducción
+Ejemplo n8n en EC2 de AWS: instalación, configuración y despliegue escalable.
 
-Este repositorio/documentación describe cómo desplegar n8n, una plataforma de automatización de workflows, en AWS EC2 usando una arquitectura desacoplada para mejorar la escalabilidad, resiliencia y mantenimiento.
+## Deploy de n8n en AWS (EC2 + PostgreSQL + Redis)
+### Introducción
+Este documento describe cómo desplegar n8n en AWS EC2 utilizando una arquitectura desacoplada para mejorar:
 
-Se implementa una infraestructura basada en contenedores con Docker, separando los servicios en dos instancias:
+Escalabilidad
+Resiliencia
+Mantenimiento
+
+Se implementa una infraestructura basada en Docker con dos instancias:
 
 Servidor de Aplicación (n8n)
-
 Servidor de Datos (PostgreSQL + Redis)
-
-Este enfoque permite soportar cargas de trabajo más complejas, como ejecuciones en cola (queue mode), automatizaciones intensivas y agentes inteligentes.
 
 ## Objetivo
 
-Implementar una infraestructura funcional y escalable que permita:
+Implementar una infraestructura que permita:
 
 Ejecutar n8n en producción o laboratorio
-
 Persistir datos en PostgreSQL
-
-Gestionar colas de ejecución con Redis
-
+Gestionar colas con Redis
 Evitar pérdida de datos
-
-Facilitar crecimiento futuro (workers, clustering)
-
-Asegurar conectividad estable (Elastic IP)
+Escalar con workers en el futuro
 
 ## Arquitectura
               ┌───────────────────────────┐
@@ -57,69 +52,50 @@ Conocimientos básicos de Linux
 
 Acceso a consola AWS
 
-1. Crear instancias EC2
-
-## EC2 #1 — n8n
-
-AMI: Ubuntu 24.04 LTS
-
-Tipo: t3.large (mínimo)
-
-Disco: 30 GB
-
-Security Group:
-
-SSH (22) → tu IP
-
-HTTP (80) → 0.0.0.0/0
-
-HTTPS (443) → 0.0.0.0/0
-
-5678 → tu IP (pruebas)
+## Crear instancias EC2
+EC2 #1 — n8n
+Ubuntu 24.04 LTS
+t3.large
+30 GB disco
+Security Group
+Puerto	Acceso
+22	Tu IP
+80	Público
+443	Público
+5678	Tu IP
 
 ## EC2 #2 — Base de datos
 
-AMI: Ubuntu 24.04 LTS
+Ubuntu 24.04 LTS
+t3.medium
+20–30 GB disco
+Security Group
+Puerto	Acceso
+22	Tu IP
+5432	IP privada n8n
+6379	IP privada n8n
 
-Tipo: t3.medium
+***Nunca abrir 5432 o 6379 a internet***
 
-Disco: 20–30 GB
+#3 Elastic IP
 
-Security Group:
-
-SSH (22) → tu IP
-
-PostgreSQL (5432) → IP privada EC2 n8n
-
-Redis (6379) → IP privada EC2 n8n
-
-** Nunca abrir 5432 o 6379 a internet.**
-
-## 2. Configurar Elastic IP
-
-Ir a EC2 → Elastic IPs
-
-Click en Allocate Elastic IP
-
-Click en Associate Elastic IP
-
-Seleccionar instancia n8n
-
-Verificar:
-
+Asignar Elastic IP a EC2 #1
+```bash
 curl ifconfig.me
+```
 
-# 3. Conectarse por SSH o por conexión desde la consola de AWS
+## Conexión SSH
 ```bash
 ssh -i tu-key.pem ubuntu@TU_ELASTIC_IP
 ```
-## 4. Preparar el servidor
 
-Ejecutar en ambas instancias:
+## Preparar servidor (AMBAS EC2)
 ```bash
+
 sudo apt update && sudo apt upgrade -y
 ```
-## 5. Configurar SWAP
+
+## Configurar SWAP
 ```bash
 sudo fallocate -l 2G /swapfile
 sudo chmod 600 /swapfile
@@ -127,69 +103,69 @@ sudo mkswap /swapfile
 sudo swapon /swapfile
 echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 ```
+
 Verificar:
 ```bash
 free -h
 ```
-6. Crear carpeta de keyrings
+
+## Instalar Docker
 ```bash
 sudo mkdir -p /etc/apt/keyrings
-```
- Descargar la clave correctamente
-```bash
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 ```
-
-Dar permisos
 ```bash
 sudo chmod a+r /etc/apt/keyrings/docker.gpg
 ```
-Agregar repositorio correctamente
 ```bash
 echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
-  https://download.docker.com/linux/ubuntu \
-  noble stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+https://download.docker.com/linux/ubuntu noble stable" \
+| sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 ```
-
-Actualizar repositorios
 ```bash
 sudo apt update
 ```
-Aquí ya NO debe salir el error de GPG
-
-Instalar Docker
 ```bash
 sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
-8. Activar Docker
+
+### Activar Docker
 ```bash
 sudo systemctl enable docker
 sudo systemctl start docker
 ```
-9. Permisos
+
+Permisos
 ```bash
 sudo usermod -aG docker ubuntu
 ```
-Cierra sesión SSH y vuelve a entrar
 
+Cerrar sesión y volver a entrar.
 
-10. Verificar
+Verificar
 ```bash
 docker --version
+```
+```bash
 docker compose version
+```
+```bash
 docker run hello-world
 ```
-Reiniciar sesión SSH.
 
-
-## 7. Configurar PostgreSQL y Redis (EC2 #2)
+## Servidor de Datos (EC2 #2)
 ```bash
 mkdir ~/data && cd ~/data
-nano docker-compose.yml
 ```
-```yml
-version: "3.8"
+```bash
+
+nano docker-compose.yml
+```bash
+
+docker-compose.yml
+
+```yaml
 
 services:
   postgres:
@@ -217,38 +193,51 @@ volumes:
   postgres_data:
   redis_data:
 ```
-
-Levantar servicios:
+Levantar:
 ```bash
+
 docker compose up -d
 ```
-
-Obtener IP privada
+Obtener IP privada:
 ```bash
+
 hostname -I
 ```
 
-Ejemplo: 172.31.x.x
+## Servidor n8n (EC2 #1)
 
-
-## 8. Configurar n8n (EC2 #1)
-```bash
 mkdir ~/n8n && cd ~/n8n
-```
 ```bash
-nano docker-compose.yml
+mkdir n8n_data
 ```
-```yml
-version: "3.8"
+
+## CORRECCIÓN DE PERMISOS (OBLIGATORIO)
+```bash
+sudo chown -R 1000:1000 n8n_data
+sudo chmod -R 755 n8n_data
+```bash
+
+nano docker-compose.yml
+```bash
+
+docker-compose.yml
+
+```yaml
 
 services:
   n8n:
     image: docker.n8n.io/n8nio/n8n
+    container_name: n8n_app
     restart: always
+    user: "1000:1000"
+
     ports:
       - "5678:5678"
 
     environment:
+      # Seguridad
+      - N8N_SECURE_COOKIE=false
+
       # Autenticación
       - N8N_BASIC_AUTH_ACTIVE=true
       - N8N_BASIC_AUTH_USER=admin
@@ -269,90 +258,56 @@ services:
       - DB_POSTGRESDB_PASSWORD=password_seguro
 
       # Redis
+      - EXECUTIONS_MODE=queue
       - QUEUE_BULL_REDIS_HOST=IP_PRIVADA_DB
       - QUEUE_BULL_REDIS_PORT=6379
-      - EXECUTIONS_MODE=queue
 
-      # Configuración general
+      # Zona horaria
       - GENERIC_TIMEZONE=America/Bogota
-      - N8N_RUNNERS_ENABLED=true
 
     volumes:
-      - ~/.n8n:/home/node/.n8n
+      - ./n8n_data:/home/node/.n8n
 
-```
-
-## 9. Levantar n8n
+## Levantar n8n
 ```bash
 docker compose up -d
 ```
-Verificar:
+
+Ver:
 ```bash
+
 docker ps
 ```
 Logs:
-
 ```bash
-docker logs -f n8n
+
+docker logs -f n8n_app
 ```
 
-## 10. Acceso
-
+## Acceso
 http://TU_ELASTIC_IP:5678
 
-
-## 11. Seguridad
+## Seguridad
 EC2 n8n
-22 → tu IP
-80 → público
-443 → público
-5678 → solo tu IP
-
+Puerto	Acceso
+22	Tu IP
+80	Público
+443	Público
+5678	Tu IP
 EC2 DB
-5432 → solo IP privada n8n
-6379 → solo IP privada n8n
+Puerto	Acceso
+5432	IP privada n8n
+6379	IP privada n8n
 
-## 12. Validación
-Probar PostgreSQL
+ ## Validación
 telnet IP_PRIVADA_DB 5432
-Probar Redis
 telnet IP_PRIVADA_DB 6379
 
-** Problemas comunes **
-
-|Problema	|Causa
-|---|---
-|Webhooks no funcionan	|IP dinámica
-|n8n pierde datos	|SQLite en uso
-|Errores en ejecución	|Redis no configurado
-|Timeout	puertos |bloqueados
-
-
-## Mejoras futuras que veremos en otro workshop
-
-Nginx + HTTPS (Let's Encrypt)
-
-Dominio personalizado
-
-n8n workers (escalado horizontal)
-
-Backups automáticos
-
-Monitoreo (Prometheus/Grafana)
-
-
-## Conclusión
-
-Con esta arquitectura:
-
-Se separa lógica de aplicación y datos
-
-Se mejora escalabilidad
-
-Se habilita uso de colas y agentes
-
-Se reduce riesgo de pérdida de datos
-
-#Autor
-
-Guía técnica para despliegue de n8n en AWS con enfoque en producción y escalabilidad fué realizado por Alfredo Díaz UNAB2026
+## Problemas comunes
+|Problema	|Causa|
+|----|-----|
+|Permiso denied	|carpeta no es 1000:1000|
+|n8n no guarda datos	|volumen incorrecto|
+|Error cookies	|falta N8N_SECURE_COOKIE|
+|Webhooks fallan	|IP dinámica|
+|Redis error	puerto bloqueado|
