@@ -206,7 +206,9 @@ hostname -I
 
 ## Servidor n8n (EC2 #1)
 
+```bash
 mkdir ~/n8n && cd ~/n8n
+```
 ```bash
 mkdir n8n_data
 ```
