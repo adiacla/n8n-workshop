@@ -161,10 +161,10 @@ mkdir ~/data && cd ~/data
 ```bash
 
 nano docker-compose.yml
+```
 ```bash
-
 docker-compose.yml
-
+```
 ```yaml
 
 services:
@@ -242,25 +242,25 @@ services:
       # Autenticación
       - N8N_BASIC_AUTH_ACTIVE=true
       - N8N_BASIC_AUTH_USER=admin
-      - N8N_BASIC_AUTH_PASSWORD=PasswordFuerte123!
+      - N8N_BASIC_AUTH_PASSWORD=Dclaros123!
 
       # URL
-      - N8N_HOST=TU_ELASTIC_IP
+      - N8N_HOST=44.215.65.236
       - N8N_PORT=5678
       - N8N_PROTOCOL=http
-      - WEBHOOK_URL=http://TU_ELASTIC_IP:5678/
+      - WEBHOOK_URL=http://44.215.65.236:5678/
 
       # Base de datos
       - DB_TYPE=postgresdb
-      - DB_POSTGRESDB_HOST=IP_PRIVADA_DB
+      - DB_POSTGRESDB_HOST=172.31.30.29
       - DB_POSTGRESDB_PORT=5432
       - DB_POSTGRESDB_DATABASE=n8n
       - DB_POSTGRESDB_USER=n8n
-      - DB_POSTGRESDB_PASSWORD=password_seguro
+      - DB_POSTGRESDB_PASSWORD=Dclaros123!
 
       # Redis
       - EXECUTIONS_MODE=queue
-      - QUEUE_BULL_REDIS_HOST=IP_PRIVADA_DB
+      - QUEUE_BULL_REDIS_HOST=172.31.30.29
       - QUEUE_BULL_REDIS_PORT=6379
 
       # Zona horaria
