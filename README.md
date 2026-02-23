@@ -173,7 +173,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: n8n
-      POSTGRES_PASSWORD: password_seguro
+      POSTGRES_PASSWORD: Dclaros123!
       POSTGRES_DB: n8n
     volumes:
       - postgres_data:/var/lib/postgresql/data
